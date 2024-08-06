@@ -4,6 +4,8 @@ import fs from "fs";
 import path from "path";
 const app = express();
 
+app.use(express.json());
+
 app.get("/", (req: Request, res: Response) => {
     res.send({ message: "Welcome to e libaray apis." });
 });
