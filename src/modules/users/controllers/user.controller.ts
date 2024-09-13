@@ -3,7 +3,7 @@ import { UserService } from "../services/user.service";
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await UserService.createUser("saif");
+        const result = await UserService.createUser(req.body);
         res.send({ msg: "Registration" });
     } catch (error) {
         next(error);
