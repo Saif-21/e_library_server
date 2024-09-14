@@ -1,33 +1,5 @@
-import { Response } from "express";
-
-// class ApiError extends Error {
-//     statusCode: number;
-
-//     constructor(res: Response, status: number, message: string) {
-//         super(message);
-//         this.statusCode = status;
-//         this.name = "ApiError";
-//         // console.error(`Unexpected Error: ${err.message}`, err.stack);
-//         res.status(500).json({
-//             success: false,
-//             message: message,
-//         });
-//     }
-
-//     static badRequest(res: Response, message: string) {
-//         return new ApiError(res, 400, message);
-//     }
-
-//     static alreadyExists(res: Response, message: string) {
-//         return new ApiError(res, 409, message);
-//     }
-// }
-
-// export default ApiError;
-
 class ApiError extends Error {
     statusCode: number;
-
     constructor(status: number, message: string) {
         super(message); // Call the base class constructor with the message
         this.statusCode = status; // Set the status code
