@@ -8,7 +8,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
             res.status(result?.statusCode).json({
                 success: true,
                 message: result?.message,
-                user: result?.user,
+                accessTokent: result?.token,
             });
         }
     } catch (error) {

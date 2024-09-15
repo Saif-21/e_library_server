@@ -9,6 +9,8 @@ const _config = {
     DB_USERNAME: process.env.DB_USERNAME,
     DB_PASSWORD: process.env.DB_PASSWORD,
     DB_NAME: process.env.DB_NAME,
+    SALT_SIZE: Number(process.env.SALT_SIZE),
+    JWT_SECRET: String(process.env.JWT_SECRET),
 };
 
 export const config = Object.freeze(_config);

@@ -1,8 +1,10 @@
 import ApiError from "../../../utils/apiError";
+import { config } from "../../../config/config";
 import { appDataSource } from "../../../config/db";
-import { User } from "../../../entity/User";
 import { RegisterUserBodySchem } from "../../../middlewares/validator";
-import { UserData } from "../types/user.types";
+import { User } from "../../../entity/User"; // USER entity
+import { UserData } from "../types/user.types"; // User Interface
+import { hashPassword, signtoken } from "../../../utils/helper";
 class User_service {
     userRepository = appDataSource.getRepository(User);
 
@@ -18,15 +20,15 @@ class User_service {
         const result: User = this.userRepository.create({
             username: data.name,
             email: data.email,
-            password: data.password,
+            password: await hashPassword(data.password, config.SALT_SIZE),
         });
         await this.userRepository.save(result);
-        const { password, ...user } = result;
+        const token = signtoken({ id: result?.id }, config.JWT_SECRET);
         return {
             success: true,
             statusCode: 200,
             message: "User created successfully.",
-            user: user,
+            token: token,
         };
     }
 
@@ -44,3 +46,12 @@ class User_service {
 const UserService = new User_service();
 
 export { UserService };
+
+/**
+ * * TODO:
+ * # 1) Mangage Timestamp [Done]
+ * # 2) Hash password befor saving [Done]
+ * # 3) create token and retturn token instaed of returning object [Done]
+ * # 4) Create login end point
+ * # 5) Create book add end point.
+ */
