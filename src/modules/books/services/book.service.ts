@@ -18,10 +18,10 @@ TODO
 # Book Table fields
 - id
 - title
-- auther
+- auther - related to USER
 - genre
 - coverImage
 - file
 - createdAt
-- updatedAt
+- updatedAt 
 */
