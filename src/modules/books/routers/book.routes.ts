@@ -4,6 +4,6 @@ import { bookUpload } from "../../../middlewares/multerConfig";
 
 const bookRouter = express.Router();
 
-bookRouter.get("/create-book", bookUpload, createBook);
+bookRouter.post("/create-book", bookUpload, createBook);
 
 export default bookRouter;
