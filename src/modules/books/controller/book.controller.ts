@@ -27,6 +27,7 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
         });
         console.log(uploadResult);
         res.json({ msg: "status" });
+
         // const result = bookService.createBook(req.body);
         // res.status(result?.statusCode).json({
         //     success: result?.success,

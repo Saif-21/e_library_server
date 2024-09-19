@@ -1,12 +1,14 @@
 class BookService {
-    createBook(data: object) {
-        return {
-            success: true,
-            statusCode: 201,
-            message: "User created successfully.",
-            token: "",
-        };
-    }
+    // createBook(data: object) {
+    //     return {
+    //         success: true,
+    //         statusCode: 201,
+    //         message: "User created successfully.",
+    //         token: "",
+    //     };
+    // }
+
+    uploadFiles(data: object) {}
 }
 
 const bookService = new BookService();
