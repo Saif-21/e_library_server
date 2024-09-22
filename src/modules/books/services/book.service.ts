@@ -1,9 +1,10 @@
-import path, { format } from "node:path";
-import cloudinary from "../../../config/cloudinary";
+import path from "node:path";
+import CloudinaryConnection from "../../../config/cloudinary";
 import { BookData, RequestFileData } from "../types/book.types";
 import ApiError from "../../../utils/apiError";
 
 class BookService {
+    private cloudinary = CloudinaryConnection.getInstance();
     private BOOK_COVER_IMAGE = "cover";
     private BOOK_PDF = "pdf";
     private BOOK_COVER_IMAGE_FOLDER_NAME = "cover-images";
@@ -62,7 +63,7 @@ class BookService {
                 };
             }
 
-            const uploadResult = await cloudinary.uploader.upload(
+            const uploadResult = await this.cloudinary.uploader.upload(
                 filePath,
                 preparedUploadData
             );
@@ -73,7 +74,6 @@ class BookService {
 
             return false;
         } catch (error) {
-            console.log(error);
             let errorMessage = "Something went wrong while uploading files.";
             if (error instanceof Error) {
                 errorMessage = error.message || errorMessage;
