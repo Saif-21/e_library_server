@@ -14,7 +14,12 @@ import {
 } from "../../../utils/helper";
 class User_service {
     userRepository = appDataSource.getRepository(Users);
-
+    /**
+     * Save New User Data.
+     *
+     * @param data
+     * @returns Object
+     */
     async createUser(data: UserData) {
         const { error } = RegisterUserBodySchem.validate(data);
         if (error) {
@@ -39,6 +44,12 @@ class User_service {
         };
     }
 
+    /**
+     * Login User
+     *
+     * @param data
+     * @returns Object
+     */
     async loginUser(data: loginUserPayloadData) {
         const { error } = LoginUserBodySchema.validate(data);
 
@@ -82,12 +93,3 @@ class User_service {
 const UserService = new User_service();
 
 export { UserService };
-
-/**
- * * TODO:
- * # 1) Mangage Timestamp [Done]
- * # 2) Hash password befor saving [Done]
- * # 3) create token and retturn token instaed of returning object [Done]
- * # 4) Create login end point
- * # 5) Create book add end point.
- */

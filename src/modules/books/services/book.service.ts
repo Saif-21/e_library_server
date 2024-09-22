@@ -171,16 +171,3 @@ class BookService {
 const bookService = new BookService();
 
 export { bookService };
-
-/*
-TODO
-# Book Table fields
-- id
-- title
-- auther - related to USER
-- genre
-- coverImage
-- file
-- createdAt
-- updatedAt 
-*/
