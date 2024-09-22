@@ -5,7 +5,7 @@ import {
     LoginUserBodySchema,
     RegisterUserBodySchem,
 } from "../../../middlewares/validator";
-import { User } from "../../../entity/User"; // USER entity
+import { Users } from "../../../entity/Users"; // USER entity
 import { loginUserPayloadData, UserData } from "../types/user.types"; //  Interface
 import {
     hashPassword,
@@ -13,8 +13,13 @@ import {
     verifyHashPassword,
 } from "../../../utils/helper";
 class User_service {
-    userRepository = appDataSource.getRepository(User);
-
+    userRepository = appDataSource.getRepository(Users);
+    /**
+     * Save New User Data.
+     *
+     * @param data
+     * @returns Object
+     */
     async createUser(data: UserData) {
         const { error } = RegisterUserBodySchem.validate(data);
         if (error) {
@@ -24,7 +29,7 @@ class User_service {
         if (isExist) {
             throw ApiError.alreadyExists("Email is already taken.");
         }
-        const result: User = this.userRepository.create({
+        const result: Users = this.userRepository.create({
             username: data.name,
             email: data.email,
             password: await hashPassword(data.password, config.SALT_SIZE),
@@ -39,6 +44,12 @@ class User_service {
         };
     }
 
+    /**
+     * Login User
+     *
+     * @param data
+     * @returns Object
+     */
     async loginUser(data: loginUserPayloadData) {
         const { error } = LoginUserBodySchema.validate(data);
 
@@ -73,7 +84,7 @@ class User_service {
             throw ApiError.badRequest("email is missing.");
         }
 
-        const userRepository = await appDataSource.getRepository(User);
+        const userRepository = await appDataSource.getRepository(Users);
         const user = await userRepository.findOneBy({ email });
         return user;
     }
@@ -82,12 +93,3 @@ class User_service {
 const UserService = new User_service();
 
 export { UserService };
-
-/**
- * * TODO:
- * # 1) Mangage Timestamp [Done]
- * # 2) Hash password befor saving [Done]
- * # 3) create token and retturn token instaed of returning object [Done]
- * # 4) Create login end point
- * # 5) Create book add end point.
- */

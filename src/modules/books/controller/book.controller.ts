@@ -5,16 +5,11 @@ import { BookData } from "../types/book.types";
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const files = req.files as BookData;
-        const result = await bookService.createBookRecord(files);
-        // console.log(result);
-        res.json({ msg: "status" });
-
-        // const result = bookService.createBook(req.body);
-        // res.status(result?.statusCode).json({
-        //     success: result?.success,
-        //     message: result?.message,
-        //     accessTokent: "",
-        // });
+        const result = await bookService.createBookRecord(files, req.body);
+        res.status(result?.statusCode).json({
+            success: result.success,
+            message: result?.message,
+        });
     } catch (error) {
         next(error);
     }

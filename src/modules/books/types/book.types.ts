@@ -14,3 +14,12 @@ export interface RequestFileData {
     path: string;
     size: number;
 }
+
+export interface BookRecordData {
+    title: string;
+    author: string;
+    genre: string;
+    description: string;
+    publishedDate: string;
+    isAvailable: boolean;
+}

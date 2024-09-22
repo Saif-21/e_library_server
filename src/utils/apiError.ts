@@ -24,8 +24,14 @@ class ApiError extends Error {
         return new ApiError(409, message);
     }
 
+    // Static method to create a 500 internal server error
     static internalServer(message: string) {
         return new ApiError(500, message);
+    }
+
+    // Static method to create a 401 unauthorized access error
+    static unAuthorizedAccess(message: string) {
+        return new ApiError(401, message);
     }
 }
 

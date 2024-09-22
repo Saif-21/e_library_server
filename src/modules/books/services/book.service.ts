@@ -1,44 +1,113 @@
 import path from "node:path";
-import cloudinary from "../../../config/cloudinary";
-import { BookData, RequestFileData } from "../types/book.types";
+import fs from "node:fs";
+import CloudinaryConnection from "../../../config/cloudinary";
+import { BookData, BookRecordData, RequestFileData } from "../types/book.types";
 import ApiError from "../../../utils/apiError";
+import { Books } from "../../../entity/Books";
+import { appDataSource } from "../../../config/db";
+import { BookRecordBodySchema } from "../../../middlewares/validator";
 
 class BookService {
+    private cloudinary = CloudinaryConnection.getInstance();
     private BOOK_COVER_IMAGE = "cover";
     private BOOK_PDF = "pdf";
     private BOOK_COVER_IMAGE_FOLDER_NAME = "cover-images";
     private BOOK_PDF_FOLDER_NAME = "book-pdfs";
-    // createBook(data: object) {
-    //     return {
-    //         success: true,
-    //         statusCode: 201,
-    //         message: "User created successfully.",
-    //         token: "",
-    //     };
-    // }
+    private booksRepository = appDataSource.getRepository(Books);
 
-    async createBookRecord(files: BookData) {
+    /**
+     * Create new book record.
+     *
+     * @param files
+     * @param data
+     * @return Object
+     */
+    async createBookRecord(files: BookData, data: BookRecordData) {
+        const coverImageData = files.coverImage[0];
+        const bookPdfData = files.bookPdf[0];
+
+        // Joi Validation
+        const { error } = BookRecordBodySchema.validate({
+            ...data,
+            coverImage: {
+                originalname: coverImageData?.originalname,
+                mimetype: coverImageData?.mimetype,
+                size: coverImageData?.size,
+            },
+            bookPdf: {
+                originalname: bookPdfData?.originalname,
+                mimetype: bookPdfData?.mimetype,
+                size: bookPdfData?.size,
+            },
+        });
+
+        if (error) {
+            throw ApiError.badRequest(error.details[0].message);
+        }
+
+        // Upload Cover Image
         const coverImageUploadData = await this.uploadFilesToCloudService(
-            files.coverImage[0],
+            coverImageData,
             this.BOOK_COVER_IMAGE
         );
 
-        // const bookPdfUpladData = await this.uploadFilesToCloudService(
-        //     files.bookPdf[0],
-        //     this.BOOK_PDF
-        // );
+        // Upload PDF file
+        const bookPdfUpladData = await this.uploadFilesToCloudService(
+            bookPdfData,
+            this.BOOK_PDF
+        );
 
-        // console.log(bookPdfUpladData);
-        console.log(coverImageUploadData);
+        // Ensure that upload data is valid
+        const coverImage =
+            typeof coverImageUploadData === "string"
+                ? coverImageUploadData
+                : undefined;
+
+        const pdfPath =
+            typeof bookPdfUpladData === "string" ? bookPdfUpladData : undefined;
+
+        if (pdfPath) {
+            const result: Books = await this.booksRepository.create({
+                title: data.title,
+                author: data.author,
+                uploadBy: 1,
+                genre: data.genre,
+                description: data.description,
+                publishedDate: new Date(data.publishedDate),
+                coverImage: coverImage,
+                pdfPath: pdfPath,
+                isAvailable: true,
+            });
+            await this.booksRepository.save(result);
+            // Return success if book created
+            return {
+                success: true,
+                statusCode: 201,
+                message: "Book record created successfully.",
+            };
+        }
+
+        return {
+            success: false,
+            statusCode: 500,
+            message: "Something went wrong while creating book record.",
+        };
     }
 
+    /**
+     * Upload Files to cloudnary
+     *
+     * @param file
+     * @param filetype
+     * @return string || boolean
+     */
     private async uploadFilesToCloudService(
         file: RequestFileData,
         filetype: string
     ) {
         try {
             const fileName = file.filename;
-            const coverImageMimeType = file.mimetype.split("/").at(-1);
+            const fileMimeType = file.mimetype.split("/").at(-1);
             const filePath = path.resolve(
                 __dirname,
                 "../../../../public/data/uploads",
@@ -49,11 +118,35 @@ class BookService {
                 folderName = this.BOOK_COVER_IMAGE_FOLDER_NAME;
             }
 
-            const uploadResult = await cloudinary.uploader.upload(filePath, {
-                filename_override: fileName,
-                folder: folderName,
-                format: coverImageMimeType,
-            });
+            if (filetype === this.BOOK_PDF) {
+                folderName = this.BOOK_PDF_FOLDER_NAME;
+            }
+
+            let preparedUploadData = {};
+            if (filetype === this.BOOK_COVER_IMAGE) {
+                preparedUploadData = {
+                    filename_override: fileName,
+                    folder: folderName,
+                    format: fileMimeType,
+                };
+            }
+
+            if (filetype === this.BOOK_PDF) {
+                preparedUploadData = {
+                    resours_type: "raw",
+                    filename_override: fileName,
+                    folder: folderName,
+                    format: fileMimeType,
+                };
+            }
+
+            const uploadResult = await this.cloudinary.uploader.upload(
+                filePath,
+                preparedUploadData
+            );
+
+            // Delete temp images
+            await fs.promises.unlink(filePath);
 
             if (uploadResult) {
                 return uploadResult.secure_url;
@@ -61,7 +154,6 @@ class BookService {
 
             return false;
         } catch (error) {
-            console.log(error);
             let errorMessage = "Something went wrong while uploading files.";
             if (error instanceof Error) {
                 errorMessage = error.message || errorMessage;
@@ -83,16 +175,3 @@ class BookService {
 const bookService = new BookService();
 
 export { bookService };
-
-/*
-TODO
-# Book Table fields
-- id
-- title
-- auther - related to USER
-- genre
-- coverImage
-- file
-- createdAt
-- updatedAt 
-*/
