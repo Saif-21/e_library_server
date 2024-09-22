@@ -1,4 +1,5 @@
 import path from "node:path";
+import fs from "node:fs";
 import CloudinaryConnection from "../../../config/cloudinary";
 import { BookData, BookRecordData, RequestFileData } from "../types/book.types";
 import ApiError from "../../../utils/apiError";
@@ -143,6 +144,9 @@ class BookService {
                 filePath,
                 preparedUploadData
             );
+
+            // Delete temp images
+            await fs.promises.unlink(filePath);
 
             if (uploadResult) {
                 return uploadResult.secure_url;
