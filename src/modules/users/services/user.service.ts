@@ -5,7 +5,7 @@ import {
     LoginUserBodySchema,
     RegisterUserBodySchem,
 } from "../../../middlewares/validator";
-import { User } from "../../../entity/User"; // USER entity
+import { Users } from "../../../entity/Users"; // USER entity
 import { loginUserPayloadData, UserData } from "../types/user.types"; //  Interface
 import {
     hashPassword,
@@ -13,7 +13,7 @@ import {
     verifyHashPassword,
 } from "../../../utils/helper";
 class User_service {
-    userRepository = appDataSource.getRepository(User);
+    userRepository = appDataSource.getRepository(Users);
 
     async createUser(data: UserData) {
         const { error } = RegisterUserBodySchem.validate(data);
@@ -24,7 +24,7 @@ class User_service {
         if (isExist) {
             throw ApiError.alreadyExists("Email is already taken.");
         }
-        const result: User = this.userRepository.create({
+        const result: Users = this.userRepository.create({
             username: data.name,
             email: data.email,
             password: await hashPassword(data.password, config.SALT_SIZE),
@@ -73,7 +73,7 @@ class User_service {
             throw ApiError.badRequest("email is missing.");
         }
 
-        const userRepository = await appDataSource.getRepository(User);
+        const userRepository = await appDataSource.getRepository(Users);
         const user = await userRepository.findOneBy({ email });
         return user;
     }

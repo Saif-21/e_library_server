@@ -66,7 +66,7 @@ class BookService {
             typeof bookPdfUpladData === "string" ? bookPdfUpladData : undefined;
 
         if (pdfPath) {
-            const result = await this.booksRepository.create({
+            const result: Books = await this.booksRepository.create({
                 title: data.title,
                 author: data.author,
                 uploadBy: 1,
