@@ -23,6 +23,10 @@ class ApiError extends Error {
     static alreadyExists(message: string) {
         return new ApiError(409, message);
     }
+
+    static internalServer(message: string) {
+        return new ApiError(500, message);
+    }
 }
 
 export default ApiError;

@@ -5,7 +5,8 @@ import { BookData } from "../types/book.types";
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const files = req.files as BookData;
-        const result = bookService.createBookRecord(files);
+        const result = await bookService.createBookRecord(files);
+        // console.log(result);
         res.json({ msg: "status" });
 
         // const result = bookService.createBook(req.body);
