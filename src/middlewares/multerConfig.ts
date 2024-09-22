@@ -13,7 +13,7 @@ const bookUpload = multer({
     limits: { fileSize: 30e7 }, // 30 mb 30 * 1024 * 1024 ...
 }).fields([
     { name: "coverImage", maxCount: 1 },
-    { name: "file", maxCount: 1 },
+    { name: "bookPdf", maxCount: 1 },
 ]);
 
 export { bookUpload };

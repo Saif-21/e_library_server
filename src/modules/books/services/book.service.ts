@@ -1,4 +1,4 @@
-import path from "node:path";
+import path, { format } from "node:path";
 import cloudinary from "../../../config/cloudinary";
 import { BookData, RequestFileData } from "../types/book.types";
 import ApiError from "../../../utils/apiError";
@@ -8,27 +8,18 @@ class BookService {
     private BOOK_PDF = "pdf";
     private BOOK_COVER_IMAGE_FOLDER_NAME = "cover-images";
     private BOOK_PDF_FOLDER_NAME = "book-pdfs";
-    // createBook(data: object) {
-    //     return {
-    //         success: true,
-    //         statusCode: 201,
-    //         message: "User created successfully.",
-    //         token: "",
-    //     };
-    // }
 
     async createBookRecord(files: BookData) {
         const coverImageUploadData = await this.uploadFilesToCloudService(
             files.coverImage[0],
             this.BOOK_COVER_IMAGE
         );
+        const bookPdfUpladData = await this.uploadFilesToCloudService(
+            files.bookPdf[0],
+            this.BOOK_PDF
+        );
 
-        // const bookPdfUpladData = await this.uploadFilesToCloudService(
-        //     files.bookPdf[0],
-        //     this.BOOK_PDF
-        // );
-
-        // console.log(bookPdfUpladData);
+        console.log(bookPdfUpladData);
         console.log(coverImageUploadData);
     }
 
@@ -38,7 +29,7 @@ class BookService {
     ) {
         try {
             const fileName = file.filename;
-            const coverImageMimeType = file.mimetype.split("/").at(-1);
+            const fileMimeType = file.mimetype.split("/").at(-1);
             const filePath = path.resolve(
                 __dirname,
                 "../../../../public/data/uploads",
@@ -49,11 +40,32 @@ class BookService {
                 folderName = this.BOOK_COVER_IMAGE_FOLDER_NAME;
             }
 
-            const uploadResult = await cloudinary.uploader.upload(filePath, {
-                filename_override: fileName,
-                folder: folderName,
-                format: coverImageMimeType,
-            });
+            if (filetype === this.BOOK_PDF) {
+                folderName = this.BOOK_PDF_FOLDER_NAME;
+            }
+
+            let preparedUploadData = {};
+            if (filetype === this.BOOK_COVER_IMAGE) {
+                preparedUploadData = {
+                    filename_override: fileName,
+                    folder: folderName,
+                    format: fileMimeType,
+                };
+            }
+
+            if (filetype === this.BOOK_PDF) {
+                preparedUploadData = {
+                    resours_type: "raw",
+                    filename_override: fileName,
+                    folder: folderName,
+                    format: fileMimeType,
+                };
+            }
+
+            const uploadResult = await cloudinary.uploader.upload(
+                filePath,
+                preparedUploadData
+            );
 
             if (uploadResult) {
                 return uploadResult.secure_url;
