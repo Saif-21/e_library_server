@@ -6,6 +6,8 @@ import ApiError from "../../../utils/apiError";
 import { Books } from "../../../entity/Books";
 import { appDataSource } from "../../../config/db";
 import { BookRecordBodySchema } from "../../../middlewares/validator";
+import { AuthRequest } from "../../../middlewares/authenticate";
+import { Request } from "express";
 
 class BookService {
     private cloudinary = CloudinaryConnection.getInstance();
@@ -22,7 +24,11 @@ class BookService {
      * @param data
      * @return Object
      */
-    async createBookRecord(files: BookData, data: BookRecordData) {
+    async createBookRecord(
+        req: Request,
+        files: BookData,
+        data: BookRecordData
+    ) {
         const coverImageData = files.coverImage[0];
         const bookPdfData = files.bookPdf[0];
 
@@ -45,17 +51,14 @@ class BookService {
             throw ApiError.badRequest(error.details[0].message);
         }
 
-        // Upload Cover Image
-        const coverImageUploadData = await this.uploadFilesToCloudService(
-            coverImageData,
-            this.BOOK_COVER_IMAGE
-        );
-
-        // Upload PDF file
-        const bookPdfUpladData = await this.uploadFilesToCloudService(
-            bookPdfData,
-            this.BOOK_PDF
-        );
+        // Upload files concurrently
+        const [coverImageUploadData, bookPdfUpladData] = await Promise.all([
+            this.uploadFilesToCloudService(
+                coverImageData,
+                this.BOOK_COVER_IMAGE
+            ),
+            this.uploadFilesToCloudService(bookPdfData, this.BOOK_PDF),
+        ]);
 
         // Ensure that upload data is valid
         const coverImage =
@@ -66,11 +69,13 @@ class BookService {
         const pdfPath =
             typeof bookPdfUpladData === "string" ? bookPdfUpladData : undefined;
 
-        if (pdfPath) {
+        if (coverImage && pdfPath) {
+            const _req = req as AuthRequest; // Interface for userId
+
             const result: Books = await this.booksRepository.create({
                 title: data.title,
                 author: data.author,
-                uploadBy: 1,
+                uploadBy: _req.userId,
                 genre: data.genre,
                 description: data.description,
                 publishedDate: new Date(data.publishedDate),
@@ -154,18 +159,25 @@ class BookService {
 
             return false;
         } catch (error) {
-            let errorMessage = "Something went wrong while uploading files.";
-            if (error instanceof Error) {
-                errorMessage = error.message || errorMessage;
-            } else if (typeof error === "string") {
-                errorMessage = error;
-            } else if (
-                error &&
-                typeof error === "object" &&
-                "message" in error
-            ) {
-                errorMessage = (error as { message: string }).message;
-            }
+            // let errorMessage = "Something went wrong while uploading files ";
+            // if (error instanceof Error) {
+            //     errorMessage = error.message || errorMessage;
+            // } else if (typeof error === "string") {
+            //     errorMessage = error;
+            // } else if (
+            //     error &&
+            //     typeof error === "object" &&
+            //     "message" in error
+            // ) {
+            //     errorMessage = (error as { message: string }).message;
+            // }
+
+            // throw ApiError.internalServer(errorMessage);
+
+            const errorMessage =
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong while uploading files.";
 
             throw ApiError.internalServer(errorMessage);
         }
