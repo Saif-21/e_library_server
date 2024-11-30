@@ -40,3 +40,17 @@ export const signtoken = (payload: object, secret: string) => {
 export const decodeJwtToken = (token: string, secret: string) => {
     return jsonWebToken.verify(token, secret);
 };
+
+export const extractPublicId = (url?: string) => {
+    // Remove the Cloudinary base URL and versioning
+    if (url) {
+        const parts = url.split("/");
+        const startIndex = parts.findIndex((part) => part === "upload") + 2;
+        const publicIdWithExtension = parts.slice(startIndex).join("/");
+        // Remove the file extension from the public ID
+        const publicId = publicIdWithExtension.split(".")[0];
+        return publicId;
+    }
+
+    return false;
+};
