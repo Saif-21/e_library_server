@@ -15,4 +15,16 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export { createBook };
+const updateBook = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await bookService.updateBook(req);
+        res.status(result?.statusCode).json({
+            success: result.success,
+            message: result?.message,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { createBook, updateBook };

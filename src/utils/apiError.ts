@@ -33,6 +33,10 @@ class ApiError extends Error {
     static unAuthorizedAccess(message: string) {
         return new ApiError(401, message);
     }
+
+    static dataNotExist(message: string) {
+        return new ApiError(200, message);
+    }
 }
 
 export default ApiError;

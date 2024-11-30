@@ -4,6 +4,7 @@ import {
     Entity,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
+    Index,
 } from "typeorm";
 
 @Entity()
@@ -11,6 +12,7 @@ export class Books {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Index()
     @Column()
     title: string;
 

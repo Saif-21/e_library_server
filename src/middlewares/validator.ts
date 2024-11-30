@@ -46,3 +46,31 @@ export const BookRecordBodySchema = Joi.object({
 
     isAvailable: Joi.boolean(),
 });
+
+export const BookRecordModifyBodySchema = Joi.object({
+    title: Joi.string(),
+    author: Joi.string(),
+    genre: Joi.string(),
+    description: Joi.string(),
+    publishedDate: Joi.date().iso(), // Accepts date in ISO format (yyyy-mm-dd)
+
+    coverImage: Joi.object({
+        originalname: Joi.string().required(), // File name validation
+        mimetype: Joi.string()
+            .valid("image/jpeg", "image/png", "image/gif")
+            .required(), // File type validation
+        size: Joi.number()
+            .max(1024 * 1024 * 2)
+            .required(), // Limit file size to 2MB
+    }),
+
+    bookPdf: Joi.object({
+        originalname: Joi.string().required(),
+        mimetype: Joi.string().valid("application/pdf").required(),
+        size: Joi.number()
+            .max(1024 * 1024 * 5)
+            .required(), // Limit PDF size to 5MB
+    }),
+
+    isAvailable: Joi.boolean(),
+});
