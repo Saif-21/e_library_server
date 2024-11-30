@@ -223,6 +223,52 @@ class BookService {
     }
 
     /**
+     * Retrieve book records.
+     *
+     * If an ID is provided, fetch a specific book record by ID.
+     * Otherwise, fetch all book records.
+     *
+     * @param id - The ID of the book to fetch, or false to fetch all books.
+     * @returns An object containing the success status, HTTP status code,
+     *          a message, and the retrieved book data.
+     */
+
+    async getBookRecord(id?: number) {
+        try {
+            const bookRecords = id
+                ? await this.getBookById(id)
+                : await this.booksRepository.find();
+
+            if (!bookRecords) {
+                return {
+                    success: false,
+                    statusCode: 404,
+                    message: id
+                        ? "Book record not found."
+                        : "Book record(s) not found.",
+                };
+            }
+
+            return {
+                success: true,
+                statusCode: 200,
+                message: id
+                    ? "Book record fetched successfully."
+                    : "Book record(s) fetched successfully.",
+                data: bookRecords,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                statusCode: 500,
+                message: id
+                    ? "Something went wrong while fetching book record."
+                    : "Something went wrong while fetching book record(s).",
+            };
+        }
+    }
+
+    /**
      * Upload Files to cloudnary
      *
      * @param file

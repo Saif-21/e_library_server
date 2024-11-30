@@ -27,4 +27,22 @@ const updateBook = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-export { createBook, updateBook };
+const getBookRecord = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { id } = req.query;
+        const result = await bookService.getBookRecord(id ? +id : undefined);
+        res.status(result?.statusCode).json({
+            success: result.success,
+            message: result?.message,
+            data: result?.data,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { createBook, updateBook, getBookRecord };
