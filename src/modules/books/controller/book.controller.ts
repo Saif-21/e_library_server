@@ -45,4 +45,22 @@ const getBookRecord = async (
     }
 };
 
-export { createBook, updateBook, getBookRecord };
+const deleteBookRecord = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { id } = req.params;
+        console.log(id);
+        const result = await bookService.deleteBookRecord(+id);
+        res.status(result?.statusCode).json({
+            success: result.success,
+            message: result?.message,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { createBook, updateBook, getBookRecord, deleteBookRecord };

@@ -210,7 +210,7 @@ class BookService {
         if (result) {
             return {
                 success: true,
-                statusCode: 201,
+                statusCode: 200,
                 message: "Book record updated successfully.",
             };
         }
@@ -264,6 +264,40 @@ class BookService {
                 message: id
                     ? "Something went wrong while fetching book record."
                     : "Something went wrong while fetching book record(s).",
+            };
+        }
+    }
+
+    /**
+     * Delete a book record by ID.
+     *
+     * @param id - The ID of the book record to delete.
+     * @returns An object containing the success status, HTTP status code,
+     *          and a message indicating the result of the operation.
+     */
+    async deleteBookRecord(id: number) {
+        try {
+            const bookRecord = await this.getBookById(id);
+            if (!bookRecord) {
+                return {
+                    success: false,
+                    statusCode: 404,
+                    message: "Book record not found.",
+                };
+            }
+
+            await this.booksRepository.delete(id);
+
+            return {
+                success: true,
+                statusCode: 200,
+                message: "Book record deleted successfully.",
+            };
+        } catch (error) {
+            return {
+                success: false,
+                statusCode: 500,
+                message: "Something went wrong while deleting book record.",
             };
         }
     }
